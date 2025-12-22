@@ -1,4 +1,4 @@
-# 🏥 Bangladeshi Doctors Directory MCP Server
+# 🏥 ShasthoMCP - Bangladeshi Healthcare Directory
 
 A Model Context Protocol (MCP) server that provides AI assistants with access to a comprehensive directory of Bangladeshi doctors, hospitals, and medical specialists.
 
@@ -24,7 +24,7 @@ A Model Context Protocol (MCP) server that provides AI assistants with access to
 
 ```bash
 # Clone the repository
-cd doctor-mcp
+cd shastho-mcp
 
 # Install dependencies
 npm install
@@ -79,9 +79,9 @@ Add to your Claude Desktop configuration (`~/Library/Application Support/Claude/
 ```json
 {
   "mcpServers": {
-    "doctor-mcp": {
+    "shastho-mcp": {
       "command": "node",
-      "args": ["/path/to/doctor-mcp/dist/index.js"],
+      "args": ["/path/to/shastho-mcp/dist/index.js"],
       "env": {
         "DB_HOST": "localhost",
         "DB_USER": "your_username",
@@ -100,9 +100,9 @@ Add to your Cursor MCP settings:
 ```json
 {
   "mcpServers": {
-    "doctor-mcp": {
+    "shastho-mcp": {
       "command": "node",
-      "args": ["/path/to/doctor-mcp/dist/index.js"]
+      "args": ["/path/to/shastho-mcp/dist/index.js"]
     }
   }
 }
@@ -343,7 +343,7 @@ Create a script to fetch data from public sources:
 ## 🏗️ Project Structure
 
 ```
-doctor-mcp/
+shastho-mcp/
 ├── src/
 │   ├── index.ts           # MCP server entry point
 │   └── db/

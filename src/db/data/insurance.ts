@@ -126,5 +126,28 @@ export const doctorInsuranceData = [
   // Dr. Farhana Rahman
   { id: 'di-14', doctorId: 'dr-farhana-rahman', insuranceProviderId: 'pragati-life', panelNumber: 'PL-P-45678' },
   { id: 'di-15', doctorId: 'dr-farhana-rahman', insuranceProviderId: 'reliance', panelNumber: 'RL-P-90123' },
+  
+  // More doctor-insurance mappings
+  { id: 'di-16', doctorId: 'dr-ak-azad-khan', insuranceProviderId: 'ssk', panelNumber: 'SSK-E-00001' },
+  { id: 'di-17', doctorId: 'dr-ak-azad-khan', insuranceProviderId: 'green-delta', panelNumber: 'GD-E-12350' },
+  
+  { id: 'di-18', doctorId: 'dr-sarwar-alam', insuranceProviderId: 'green-delta', panelNumber: 'GD-O-12351' },
+  { id: 'di-19', doctorId: 'dr-sarwar-alam', insuranceProviderId: 'metlife', panelNumber: 'ML-O-67892' },
+  
+  { id: 'di-20', doctorId: 'dr-sonia-khan', insuranceProviderId: 'metlife', panelNumber: 'ML-PS-67893' },
+  { id: 'di-21', doctorId: 'dr-sonia-khan', insuranceProviderId: 'guardian-life', panelNumber: 'GL-PS-23457' },
+  { id: 'di-22', doctorId: 'dr-sonia-khan', insuranceProviderId: 'brac-health', panelNumber: 'BR-PS-00001' },
+  
+  { id: 'di-23', doctorId: 'dr-nusrat-jahan-derma', insuranceProviderId: 'green-delta', panelNumber: 'GD-D-12352' },
+  { id: 'di-24', doctorId: 'dr-nusrat-jahan-derma', insuranceProviderId: 'metlife', panelNumber: 'ML-D-67894' },
+  
+  { id: 'di-25', doctorId: 'dr-sharmin-hossain-endo', insuranceProviderId: 'ssk', panelNumber: 'SSK-E-00002' },
+  { id: 'di-26', doctorId: 'dr-sharmin-hossain-endo', insuranceProviderId: 'green-delta', panelNumber: 'GD-E-12353' },
+  
+  { id: 'di-27', doctorId: 'dr-zahirul-islam-nephro', insuranceProviderId: 'green-delta', panelNumber: 'GD-N-12354' },
+  { id: 'di-28', doctorId: 'dr-zahirul-islam-nephro', insuranceProviderId: 'metlife', panelNumber: 'ML-N-67895' },
+  
+  { id: 'di-29', doctorId: 'dr-nurul-islam-ctg', insuranceProviderId: 'green-delta', panelNumber: 'GD-C-12355' },
+  { id: 'di-30', doctorId: 'dr-nurul-islam-ctg', insuranceProviderId: 'pragati-life', panelNumber: 'PL-C-78902' },
 ];
 

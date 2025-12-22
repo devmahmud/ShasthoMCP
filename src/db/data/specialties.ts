@@ -1,12 +1,20 @@
-// Medical specialties data
-
 export const specialtiesData = [
+  // =========================
+  // Core Medicine
+  // =========================
   {
     id: 'medicine',
     nameEn: 'Medicine',
     nameBn: 'মেডিসিন',
     category: 'Medicine',
     description: 'Internal medicine and general healthcare',
+  },
+  {
+    id: 'family-medicine',
+    nameEn: 'Family Medicine',
+    nameBn: 'পারিবারিক চিকিৎসা',
+    category: 'Medicine',
+    description: 'Primary care and general practice',
   },
   {
     id: 'cardiology',
@@ -62,7 +70,7 @@ export const specialtiesData = [
     nameEn: 'Dermatology',
     nameBn: 'চর্মরোগ',
     category: 'Medicine',
-    description: 'Skin diseases and cosmetic treatments',
+    description: 'Skin, hair, and nail diseases',
   },
   {
     id: 'psychiatry',
@@ -72,6 +80,31 @@ export const specialtiesData = [
     description: 'Mental health and behavioral disorders',
   },
   {
+    id: 'infectious-diseases',
+    nameEn: 'Infectious Diseases',
+    nameBn: 'সংক্রামক রোগ',
+    category: 'Medicine',
+    description: 'Dengue, TB, COVID-19, hepatitis, infections',
+  },
+  {
+    id: 'oncology',
+    nameEn: 'Oncology',
+    nameBn: 'ক্যান্সার রোগ',
+    category: 'Medicine',
+    description: 'Cancer diagnosis and treatment',
+  },
+  {
+    id: 'hematology',
+    nameEn: 'Hematology',
+    nameBn: 'রক্তরোগ',
+    category: 'Medicine',
+    description: 'Blood disorders',
+  },
+
+  // =========================
+  // Child & Women’s Health
+  // =========================
+  {
     id: 'pediatrics',
     nameEn: 'Pediatrics',
     nameBn: 'শিশু রোগ',
@@ -79,12 +112,23 @@ export const specialtiesData = [
     description: 'Child healthcare',
   },
   {
+    id: 'neonatology',
+    nameEn: 'Neonatology',
+    nameBn: 'নবজাতক চিকিৎসা',
+    category: 'Medicine',
+    description: 'Newborn and NICU care',
+  },
+  {
     id: 'gynecology',
     nameEn: 'Gynecology & Obstetrics',
     nameBn: 'স্ত্রীরোগ ও প্রসূতি',
-    category: 'Surgery',
-    description: "Women's health and pregnancy care",
+    category: 'Women’s Health',
+    description: "Women's health, pregnancy, and childbirth",
   },
+
+  // =========================
+  // Surgery
+  // =========================
   {
     id: 'general-surgery',
     nameEn: 'General Surgery',
@@ -97,7 +141,7 @@ export const specialtiesData = [
     nameEn: 'Orthopedics',
     nameBn: 'হাড় ও জোড়া',
     category: 'Surgery',
-    description: 'Bone, joint and muscle problems',
+    description: 'Bone, joint, and muscle problems',
   },
   {
     id: 'cardiac-surgery',
@@ -122,10 +166,10 @@ export const specialtiesData = [
   },
   {
     id: 'ent',
-    nameEn: 'ENT (Otolaryngology)',
+    nameEn: 'Otolaryngology (ENT)',
     nameBn: 'নাক-কান-গলা',
     category: 'Surgery',
-    description: 'Ear, nose and throat disorders',
+    description: 'Ear, nose, and throat disorders',
   },
   {
     id: 'ophthalmology',
@@ -135,24 +179,53 @@ export const specialtiesData = [
     description: 'Eye diseases and surgery',
   },
   {
-    id: 'oncology',
-    nameEn: 'Oncology',
-    nameBn: 'ক্যান্সার রোগ',
-    category: 'Medicine',
-    description: 'Cancer treatment',
+    id: 'plastic-surgery',
+    nameEn: 'Plastic Surgery',
+    nameBn: 'প্লাস্টিক সার্জারি',
+    category: 'Surgery',
+    description: 'Reconstructive and cosmetic surgery',
   },
   {
-    id: 'hematology',
-    nameEn: 'Hematology',
-    nameBn: 'রক্তরোগ',
-    category: 'Medicine',
-    description: 'Blood disorders',
+    id: 'anesthesiology',
+    nameEn: 'Anesthesiology',
+    nameBn: 'অ্যানেস্থেসিয়া',
+    category: 'Surgery',
+    description: 'Anesthesia, pain management, ICU support',
   },
+
+  // =========================
+  // Diagnostics & Emergency
+  // =========================
+  {
+    id: 'emergency-medicine',
+    nameEn: 'Emergency Medicine',
+    nameBn: 'জরুরি চিকিৎসা',
+    category: 'Emergency',
+    description: '24/7 emergency and trauma care',
+  },
+  {
+    id: 'radiology',
+    nameEn: 'Radiology & Imaging',
+    nameBn: 'রেডিওলজি',
+    category: 'Diagnostics',
+    description: 'X-ray, CT, MRI, ultrasound imaging',
+  },
+  {
+    id: 'pathology',
+    nameEn: 'Pathology',
+    nameBn: 'প্যাথলজি',
+    category: 'Diagnostics',
+    description: 'Laboratory medicine and diagnostics',
+  },
+
+  // =========================
+  // Rehab & Dental
+  // =========================
   {
     id: 'physical-medicine',
     nameEn: 'Physical Medicine & Rehabilitation',
     nameBn: 'ফিজিক্যাল মেডিসিন',
-    category: 'Medicine',
+    category: 'Rehabilitation',
     description: 'Physical therapy and rehabilitation',
   },
   {
@@ -160,14 +233,6 @@ export const specialtiesData = [
     nameEn: 'Dentistry',
     nameBn: 'দন্তরোগ',
     category: 'Dental',
-    description: 'Dental care and oral surgery',
-  },
-  {
-    id: 'plastic-surgery',
-    nameEn: 'Plastic Surgery',
-    nameBn: 'প্লাস্টিক সার্জারি',
-    category: 'Surgery',
-    description: 'Reconstructive and cosmetic surgery',
+    description: 'Dental and oral healthcare',
   },
 ];
-

@@ -88,7 +88,7 @@ const getDayName = (dayOfWeek: number) => {
 
 const server = new Server(
   {
-    name: 'doctor-mcp',
+    name: 'shastho-mcp',
     version: '1.0.0',
   },
   {
