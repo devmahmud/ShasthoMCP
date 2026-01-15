@@ -12,13 +12,16 @@ import {
 } from './schema.js';
 import { eq, like, and, or, sql, gte, lte, desc } from 'drizzle-orm';
 import { findSpecialtiesForSymptoms } from './data/symptoms.js';
+import { DAY_NAMES } from '../types.js';
 
 // ============================================
 // Doctor Queries
 // ============================================
 
-export const searchDoctors = (query: string, limit = 20) => {
+export const searchDoctors = (query: string, limit = 20, offset = 0) => {
   const searchTerm = `%${query.toLowerCase()}%`;
+  const safeLimit = Math.min(Math.max(1, limit), 100); // Clamp between 1-100
+  const safeOffset = Math.max(0, offset);
 
   return db.query.doctors.findMany({
     where: or(
@@ -29,7 +32,8 @@ export const searchDoctors = (query: string, limit = 20) => {
     with: {
       primarySpecialty: true,
     },
-    limit,
+    limit: safeLimit,
+    offset: safeOffset,
   });
 };
 
@@ -57,10 +61,34 @@ export const getDoctorById = (doctorId: string) => {
   });
 };
 
-export const findDoctorsBySpecialty = (specialtyId: string, divisionId?: string, limit = 20) => {
-  return db.query.doctors
-    .findMany({
-      where: eq(doctors.primarySpecialtyId, specialtyId),
+export const findDoctorsBySpecialty = async (
+  specialtyId: string,
+  divisionId?: string,
+  limit = 20
+) => {
+  if (divisionId) {
+    // Use a subquery approach: find doctors who have schedules in the specified division
+    const doctorIdsInDivision = await db
+      .select({ doctorId: chamberSchedules.doctorId })
+      .from(chamberSchedules)
+      .innerJoin(hospitals, eq(chamberSchedules.hospitalId, hospitals.id))
+      .where(and(eq(hospitals.divisionId, divisionId), eq(chamberSchedules.isActive, true)))
+      .groupBy(chamberSchedules.doctorId);
+
+    const doctorIds = doctorIdsInDivision.map((d) => d.doctorId);
+
+    if (doctorIds.length === 0) {
+      return [];
+    }
+
+    return db.query.doctors.findMany({
+      where: and(
+        eq(doctors.primarySpecialtyId, specialtyId),
+        sql`${doctors.id} IN (${sql.join(
+          doctorIds.map((id) => sql`${id}`),
+          sql`, `
+        )})`
+      ),
       with: {
         primarySpecialty: true,
         chamberSchedules: {
@@ -74,15 +102,25 @@ export const findDoctorsBySpecialty = (specialtyId: string, divisionId?: string,
         },
       },
       limit,
-    })
-    .then((results) => {
-      if (divisionId) {
-        return results.filter((doc) =>
-          doc.chamberSchedules.some((cs) => cs.hospital.divisionId === divisionId)
-        );
-      }
-      return results;
     });
+  }
+
+  return db.query.doctors.findMany({
+    where: eq(doctors.primarySpecialtyId, specialtyId),
+    with: {
+      primarySpecialty: true,
+      chamberSchedules: {
+        with: {
+          hospital: {
+            with: {
+              division: true,
+            },
+          },
+        },
+      },
+    },
+    limit,
+  });
 };
 
 export const findDoctorsByLocation = (divisionId: string, districtId?: string, limit = 20) => {
@@ -242,8 +280,6 @@ export const findDoctorsAvailableToday = (specialtyId?: string, divisionId?: str
 };
 
 export const getChamberSchedule = (doctorId: string) => {
-  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
   return db.query.chamberSchedules
     .findMany({
       where: and(eq(chamberSchedules.doctorId, doctorId), eq(chamberSchedules.isActive, true)),
@@ -258,7 +294,7 @@ export const getChamberSchedule = (doctorId: string) => {
     })
     .then((schedules) =>
       schedules.map((s) => ({
-        day: days[s.dayOfWeek],
+        day: DAY_NAMES[s.dayOfWeek],
         dayOfWeek: s.dayOfWeek,
         hospital: {
           nameEn: s.hospital.nameEn,
@@ -284,57 +320,64 @@ export const getChamberSchedule = (doctorId: string) => {
 // NEW: Fee Range Filter
 // ============================================
 
-export const findDoctorsByFeeRange = (
+export const findDoctorsByFeeRange = async (
   minFee?: number,
   maxFee?: number,
   specialtyId?: string,
   divisionId?: string,
   limit = 20
 ) => {
-  return db.query.doctors
-    .findMany({
-      where: and(
-        specialtyId ? eq(doctors.primarySpecialtyId, specialtyId) : undefined,
-        minFee ? gte(doctors.consultationFeeMin, minFee) : undefined,
-        maxFee ? lte(doctors.consultationFeeMax, maxFee) : undefined
-      ),
-      with: {
-        primarySpecialty: true,
-        chamberSchedules: {
-          with: {
-            hospital: {
-              with: {
-                division: true,
-              },
-            },
-          },
-        },
-      },
-      limit: limit * 2, // Get more to filter by division later
-    })
-    .then((results) => {
-      let filtered = results;
+  // Build base conditions
+  const conditions = [
+    specialtyId ? eq(doctors.primarySpecialtyId, specialtyId) : undefined,
+    minFee ? gte(doctors.consultationFeeMin, minFee) : undefined,
+    maxFee ? lte(doctors.consultationFeeMax, maxFee) : undefined,
+  ].filter(Boolean);
 
-      if (divisionId) {
-        filtered = results.filter((doc) =>
-          doc.chamberSchedules.some((cs) => cs.hospital.divisionId === divisionId)
-        );
-      }
+  // If divisionId is provided, filter at database level
+  if (divisionId) {
+    const doctorIdsInDivision = await db
+      .select({ doctorId: chamberSchedules.doctorId })
+      .from(chamberSchedules)
+      .innerJoin(hospitals, eq(chamberSchedules.hospitalId, hospitals.id))
+      .where(and(eq(hospitals.divisionId, divisionId), eq(chamberSchedules.isActive, true)))
+      .groupBy(chamberSchedules.doctorId);
 
-      return filtered.slice(0, limit).map((doc) => ({
-        id: doc.id,
-        nameEn: doc.nameEn,
-        nameBn: doc.nameBn,
-        specialty: doc.primarySpecialty.nameEn,
-        designation: doc.designation,
-        experienceYears: doc.experienceYears,
-        feeRange: {
-          min: doc.consultationFeeMin,
-          max: doc.consultationFeeMax,
-        },
-        telemedicineAvailable: doc.telemedicineAvailable,
-      }));
-    });
+    const doctorIds = doctorIdsInDivision.map((d) => d.doctorId);
+
+    if (doctorIds.length === 0) {
+      return [];
+    }
+
+    conditions.push(
+      sql`${doctors.id} IN (${sql.join(
+        doctorIds.map((id) => sql`${id}`),
+        sql`, `
+      )})`
+    );
+  }
+
+  const results = await db.query.doctors.findMany({
+    where: conditions.length > 0 ? and(...conditions) : undefined,
+    with: {
+      primarySpecialty: true,
+    },
+    limit,
+  });
+
+  return results.map((doc) => ({
+    id: doc.id,
+    nameEn: doc.nameEn,
+    nameBn: doc.nameBn,
+    specialty: doc.primarySpecialty.nameEn,
+    designation: doc.designation,
+    experienceYears: doc.experienceYears,
+    feeRange: {
+      min: doc.consultationFeeMin,
+      max: doc.consultationFeeMax,
+    },
+    telemedicineAvailable: doc.telemedicineAvailable,
+  }));
 };
 
 // ============================================
@@ -548,52 +591,58 @@ export const getDoctorReviews = (doctorId: string, limit = 10) => {
     );
 };
 
-export const getTopRatedDoctors = (specialtyId?: string, divisionId?: string, limit = 10) => {
-  return db.query.doctors
-    .findMany({
-      where: and(
-        specialtyId ? eq(doctors.primarySpecialtyId, specialtyId) : undefined,
-        gte(doctors.avgRating, 4.0) // Only show doctors with 4+ rating
-      ),
-      with: {
-        primarySpecialty: true,
-        chamberSchedules: {
-          with: {
-            hospital: {
-              with: {
-                division: true,
-              },
-            },
-          },
-        },
-      },
-      orderBy: desc(doctors.avgRating),
-      limit: limit * 2,
-    })
-    .then((results) => {
-      let filtered = results;
+export const getTopRatedDoctors = async (specialtyId?: string, divisionId?: string, limit = 10) => {
+  const conditions = [
+    gte(doctors.avgRating, 4.0), // Only show doctors with 4+ rating
+    specialtyId ? eq(doctors.primarySpecialtyId, specialtyId) : undefined,
+  ].filter(Boolean);
 
-      if (divisionId) {
-        filtered = results.filter((doc) =>
-          doc.chamberSchedules.some((cs) => cs.hospital.divisionId === divisionId)
-        );
-      }
+  // If divisionId is provided, filter at database level
+  if (divisionId) {
+    const doctorIdsInDivision = await db
+      .select({ doctorId: chamberSchedules.doctorId })
+      .from(chamberSchedules)
+      .innerJoin(hospitals, eq(chamberSchedules.hospitalId, hospitals.id))
+      .where(and(eq(hospitals.divisionId, divisionId), eq(chamberSchedules.isActive, true)))
+      .groupBy(chamberSchedules.doctorId);
 
-      return filtered.slice(0, limit).map((doc) => ({
-        id: doc.id,
-        nameEn: doc.nameEn,
-        nameBn: doc.nameBn,
-        specialty: doc.primarySpecialty.nameEn,
-        designation: doc.designation,
-        experienceYears: doc.experienceYears,
-        rating: doc.avgRating,
-        totalReviews: doc.totalReviews,
-        feeRange: {
-          min: doc.consultationFeeMin,
-          max: doc.consultationFeeMax,
-        },
-      }));
-    });
+    const doctorIds = doctorIdsInDivision.map((d) => d.doctorId);
+
+    if (doctorIds.length === 0) {
+      return [];
+    }
+
+    conditions.push(
+      sql`${doctors.id} IN (${sql.join(
+        doctorIds.map((id) => sql`${id}`),
+        sql`, `
+      )})`
+    );
+  }
+
+  const results = await db.query.doctors.findMany({
+    where: and(...conditions),
+    with: {
+      primarySpecialty: true,
+    },
+    orderBy: desc(doctors.avgRating),
+    limit,
+  });
+
+  return results.map((doc) => ({
+    id: doc.id,
+    nameEn: doc.nameEn,
+    nameBn: doc.nameBn,
+    specialty: doc.primarySpecialty.nameEn,
+    designation: doc.designation,
+    experienceYears: doc.experienceYears,
+    rating: doc.avgRating,
+    totalReviews: doc.totalReviews,
+    feeRange: {
+      min: doc.consultationFeeMin,
+      max: doc.consultationFeeMax,
+    },
+  }));
 };
 
 // ============================================
