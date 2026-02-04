@@ -27,7 +27,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.25.2",
+    "@modelcontextprotocol/sdk": "^1.26.0",
     "drizzle-orm": "^0.38.2",
     "pg": "^8.13.1",
     "pino": "^10.2.0",
